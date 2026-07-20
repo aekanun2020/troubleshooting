@@ -68,16 +68,27 @@ goto :eof
 :import_one
 set BASE=%~1
 set SRC=
+set GZ=
 
-REM Find file (exact or with timestamp suffix)
+REM Find file (exact or with timestamp suffix), .sql first then .sql.gz
 if exist "%SQL_DIR%\%BASE%.sql" (
   set SRC=%SQL_DIR%\%BASE%.sql
 ) else (
   for %%F in ("%SQL_DIR%\%BASE%*.sql") do set SRC=%%F
 )
 if "!SRC!"=="" (
+  for %%F in ("%SQL_DIR%\%BASE%*.sql.gz") do set GZ=%%F
+)
+if "!SRC!"=="" if "!GZ!"=="" (
   echo [SKIP] %BASE% - file not found in %SQL_DIR%
   goto :eof
+)
+
+REM Decompress .gz once if needed
+if not "!GZ!"=="" (
+  echo -^> Decompressing: !GZ!
+  python gunzip.py "!GZ!"
+  set SRC=!GZ:.gz=!
 )
 
 echo.

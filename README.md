@@ -14,26 +14,33 @@
 สคริปต์นี้จะ **เติม `GO` ให้อัตโนมัติทุก 500 statement** แล้วนำเข้าให้ตามลำดับที่ถูกต้อง
 (ตาราง dimension ก่อน → ตาราง fact ทีหลัง)
 
+## ไฟล์ข้อมูลมาให้ใน repo แล้ว
+
+ไม่ต้องดาวน์โหลดเพิ่ม — ไฟล์ `.sql` อยู่ในโฟลเดอร์ `sql/` ให้แล้ว
+(ไฟล์ fact ขนาด 156MB ถูกบีบอัดเป็น `.sql.gz` เพื่อให้เก็บใน git ได้ — สคริปต์จะคลายให้เองตอนรัน)
+
 ## สิ่งที่ต้องมีก่อน
 
 1. Docker Desktop เปิดอยู่ และ container SQL Server กำลังทำงาน (ค่าเริ่มต้นชื่อ `sql_server`)
-2. ไฟล์ `.sql` ทั้งหมดวางไว้ในโฟลเดอร์ `sql/`
+2. มี Python ติดตั้งบนเครื่อง (ใช้คลายไฟล์ .gz — มากับ Anaconda/Miniconda อยู่แล้ว)
 
 ```
 import-toolkit/
 ├── sql/
-│   ├── application_type_dim_*.sql
-│   ├── emp_length_dim_*.sql
-│   ├── home_ownership_dim_*.sql
-│   ├── issue_d_dim_*.sql
-│   ├── loan_status_dim_*.sql
-│   ├── loans_fact_*.sql          (ไฟล์ใหญ่ 156MB)
-│   └── allrawloanstat_*.sql      (ไฟล์ใหญ่ 528MB)
-├── add_go.py
+│   ├── application_type_dim_202602251308.sql   ✅ อยู่ใน repo
+│   ├── emp_length_dim_202602251308.sql        ✅ อยู่ใน repo
+│   ├── home_ownership_dim_202602251308.sql    ✅ อยู่ใน repo
+│   ├── issue_d_dim_202602251308.sql           ✅ อยู่ใน repo
+│   ├── loan_status_dim_202602251308.sql       ✅ อยู่ใน repo
+│   └── loans_fact_202602251308.sql.gz         ✅ อยู่ใน repo (บีบอัด 21MB)
+├── add_go.py         (helper เติม GO)
+├── gunzip.py         (helper คลาย .gz — ใช้บน Windows)
 ├── import_all.sh     (สำหรับ Mac / Linux)
 ├── import_all.bat    (สำหรับ Windows)
 └── README.md
 ```
+
+> หมายเหตุ: ไฟล์ `allrawloanstat` (528MB) ไม่ได้รวมอยู่ใน repo ตามที่กำหนด
 
 ## วิธีใช้
 

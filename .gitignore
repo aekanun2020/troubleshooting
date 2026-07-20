@@ -1,1 +1,4 @@
-sql/*.sql
+# ไฟล์ fact ขนาดใหญ่ที่ถูกคลายจาก .gz ตอนรันสคริปต์ (ไม่ต้อง commit)
+sql/loans_fact*.sql
+# ไฟล์ raw ขนาดใหญ่มาก (528MB) ไม่นำเข้า repo ตามที่ระบุ
+sql/allrawloanstat*.sql

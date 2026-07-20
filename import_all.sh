@@ -71,13 +71,26 @@ import_one() {
   local base="$1"
   local src="$SQL_DIR/$base.sql"
 
-  # หาไฟล์แบบยืดหยุ่น (เผื่อชื่อมี timestamp ต่อท้าย เช่น loans_fact_202602251308.sql)
+  # หาไฟล์แบบยืดหยุ่น: รองรับทั้ง .sql และ .sql.gz (เผื่อชื่อมี timestamp ต่อท้าย)
+  local gz=""
   if [ ! -f "$src" ]; then
     src=$(ls "$SQL_DIR/${base}"*.sql 2>/dev/null | head -1 || true)
   fi
   if [ -z "${src:-}" ] || [ ! -f "$src" ]; then
+    gz=$(ls "$SQL_DIR/${base}"*.sql.gz 2>/dev/null | head -1 || true)
+  fi
+  if [ -z "${src:-}" ] && [ -z "${gz:-}" ]; then
     echo "⚠️  ข้าม '$base' — ไม่พบไฟล์ในโฟลเดอร์ $SQL_DIR"
     return 0
+  fi
+
+  # ถ้าเป็นไฟล์ .gz ให้คลายก่อน (ครั้งเดียว)
+  if [ -n "${gz:-}" ]; then
+    src="${gz%.gz}"
+    if [ ! -f "$src" ]; then
+      echo "→ กำลังคลายไฟล์: $(basename "$gz")"
+      gunzip -k "$gz"
+    fi
   fi
 
   local fname; fname=$(basename "$src")
