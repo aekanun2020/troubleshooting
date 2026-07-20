@@ -42,11 +42,50 @@ import-toolkit/
 
 > หมายเหตุ: ไฟล์ `allrawloanstat` (528MB) ไม่ได้รวมอยู่ใน repo ตามที่กำหนด
 
-## วิธีใช้
+## ขั้นตอนที่ 1: ดาวน์โหลดไฟล์มาที่เครื่อง (ไม่ต้องใช้ git)
+
+วิธีที่ง่ายที่สุดสำหรับผู้เรียน — ไม่ต้องติดตั้ง git แค่กดปุ่มเดียว
+
+### กดดาวน์โหลด ZIP
+
+คลิกลิงก์นี้เพื่อโหลดไฟล์ทั้งหมดเป็นไฟล์ ZIP ก้อนเดียว (ได้ทั้งสคริปต์และไฟล์ .sql):
+
+**[⬇️ คลิกที่นี่เพื่อดาวน์โหลด ZIP](https://github.com/aekanun2020/troubleshooting/archive/refs/heads/main.zip)**
+
+หรือเข้าหน้า repo → กดปุ่มเขียว **`< > Code`** → เลือก **Download ZIP**
+
+### แตกไฟล์ (unzip)
+
+**บน macOS:**
+1. เปิดโฟลเดอร์ **Downloads** → ดับเบิ้ลคลิกที่ไฟล์ `troubleshooting-main.zip` → จะแตกเป็นโฟลเดอร์ `troubleshooting-main` ให้อัตโนมัติ
+2. แนะนำ: ย้ายโฟลเดอร์นี้ไปไว้ที่หาง่าย เช่น **Desktop** (หน้าจอ)
+
+**บน Windows:**
+1. เปิดโฟลเดอร์ **Downloads** → คลิกขวาที่ไฟล์ `troubleshooting-main.zip` → เลือก **Extract All...** → กด **Extract**
+2. แนะนำ: แตกไปไว้ที่หาง่าย เช่น **Desktop**
+
+### เปิด Terminal / Command Prompt มาที่โฟลเดอร์ที่แตกไว้
+
+**บน macOS (วิธีง่ายสุด):**
+1. เปิดแอป **Terminal** (กด `Cmd + Space` แล้วพิมพ์ Terminal)
+2. พิมพ์ `cd ` (มีเว้นวรรคต่อท้าย) **แล้วลากโฟลเดอร์ `troubleshooting-main` จาก Finder มาวางในหน้าต่าง Terminal** (path จะเติมให้อัตโนมัติ) → กด Enter
+
+```bash
+cd /Users/<username>/Desktop/troubleshooting-main
+```
+
+**บน Windows (วิธีง่ายสุด):**
+1. เปิดโฟลเดอร์ `troubleshooting-main` ใน File Explorer
+2. คลิกที่ช่อง address bar ด้านบน (ที่แสดง path) → พิมพ์ `cmd` → กด Enter
+   (Command Prompt จะเปิดที่โฟลเดอร์นี้ให้อัตโนมัติ)
+
+> เมื่ออยู่ในโฟลเดอร์ที่ถูกต้องแล้ว ให้ดูขั้นตอนที่ 2 ด้านล่างได้เลย
+
+## ขั้นตอนที่ 2: รันสคริปต์นำเข้า
 
 ### บน macOS / Linux
 
-เปิด Terminal มาที่โฟลเดอร์นี้ แล้วรัน:
+ใน Terminal ที่เปิดค้างไว้ที่โฟลเดอร์ (จากขั้นตอนที่ 1) พิมพ์:
 
 ```bash
 bash import_all.sh
@@ -54,7 +93,7 @@ bash import_all.sh
 
 ### บน Windows
 
-เปิด Command Prompt มาที่โฟลเดอร์นี้ แล้วรัน:
+ใน Command Prompt ที่เปิดค้างไว้ที่โฟลเดอร์ (จากขั้นตอนที่ 1) พิมพ์:
 
 ```bat
 import_all.bat
