@@ -33,7 +33,14 @@ echo ===============================================
 REM Import order: dimensions first, then facts
 set ORDER=application_type_dim emp_length_dim home_ownership_dim issue_d_dim loan_status_dim loans_fact allrawloanstat
 
-REM Check SQL Server connection (this also proves the container is running)
+REM Check container is running
+docker ps --format "{{.Names}}" | findstr /x "%CONTAINER%" >nul
+if errorlevel 1 (
+  echo [ERROR] Container "%CONTAINER%" is not running. Check with: docker ps
+  exit /b 1
+)
+
+REM Check SQL Server connection
 echo -^> Checking SQL Server connection ...
 docker exec %CONTAINER% %SQLCMD% -S localhost -U SA -P "%SA_PASSWORD%" -C -Q "SELECT 1" >nul 2>&1
 if errorlevel 1 (
@@ -47,10 +54,8 @@ echo -^> Ensuring database "%DATABASE%" exists ...
 docker exec %CONTAINER% %SQLCMD% -S localhost -U SA -P "%SA_PASSWORD%" -C -Q "IF DB_ID('%DATABASE%') IS NULL CREATE DATABASE [%DATABASE%];" >nul
 echo    Ready
 
-REM Copy helpers into the container once (decompress + GO-batching run INSIDE the container,
-REM so Windows does not need Python installed on the host)
+REM Copy the GO-batching helper into the container once
 docker cp "%~dp0add_go.py" %CONTAINER%:/tmp/add_go.py
-docker cp "%~dp0gunzip.py" %CONTAINER%:/tmp/gunzip.py
 
 for %%B in (%ORDER%) do call :import_one %%B
 
@@ -79,22 +84,21 @@ if "!SRC!"=="" if "!GZ!"=="" (
   goto :eof
 )
 
+REM Decompress .gz once if needed
 if not "!GZ!"=="" (
-  REM ---- Compressed file: copy .gz into container, decompress + GO-batch INSIDE it ----
-  echo.
-  echo -^> Importing (compressed): !GZ!
-  docker cp "!GZ!" %CONTAINER%:/tmp/_in.sql.gz
-  docker exec %CONTAINER% python3 /tmp/gunzip.py /tmp/_in.sql.gz
-  docker exec %CONTAINER% python3 /tmp/add_go.py /tmp/_in.sql /tmp/_fixed.sql %BATCH_SIZE%
-) else (
-  REM ---- Plain .sql file: copy into container and GO-batch ----
-  echo.
-  echo -^> Importing: !SRC!
-  docker cp "!SRC!" %CONTAINER%:/tmp/_in.sql
-  docker exec %CONTAINER% python3 /tmp/add_go.py /tmp/_in.sql /tmp/_fixed.sql %BATCH_SIZE%
+  echo -^> Decompressing: !GZ!
+  python gunzip.py "!GZ!"
+  set SRC=!GZ:.gz=!
 )
 
-REM Import the fixed file
+echo.
+echo -^> Importing: !SRC!
+
+REM 1) Copy into container and add GO every N statements
+docker cp "!SRC!" %CONTAINER%:/tmp/_in.sql
+docker exec %CONTAINER% python3 /tmp/add_go.py /tmp/_in.sql /tmp/_fixed.sql %BATCH_SIZE%
+
+REM 2) Import the fixed file
 docker exec %CONTAINER% %SQLCMD% -S localhost -U SA -P "%SA_PASSWORD%" -d "%DATABASE%" -C -b -i /tmp/_fixed.sql
-echo    OK: %BASE%
+echo    OK: !SRC!
 goto :eof

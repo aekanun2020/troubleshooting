@@ -62,10 +62,9 @@ docker exec "$CONTAINER" "$SQLCMD" -S localhost -U SA -P "$SA_PASSWORD" -C \
   -Q "IF DB_ID('$DATABASE') IS NULL CREATE DATABASE [$DATABASE];" >/dev/null
 echo "   พร้อมใช้งาน ✅"
 
-# คัดลอก helper เข้าไปใน container หนึ่งครั้ง (คลาย .gz + เติม GO ทำใน container)
+# คัดลอก helper สำหรับเติม GO เข้าไปใน container หนึ่งครั้ง
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 docker cp "$SCRIPT_DIR/add_go.py" "$CONTAINER:/tmp/add_go.py"
-docker cp "$SCRIPT_DIR/gunzip.py" "$CONTAINER:/tmp/gunzip.py"
 
 # ฟังก์ชัน: เติม GO ให้ไฟล์ แล้วนำเข้า
 import_one() {
@@ -85,24 +84,27 @@ import_one() {
     return 0
   fi
 
-  echo ""
+  # ถ้าเป็นไฟล์ .gz ให้คลายก่อน (ครั้งเดียว)
   if [ -n "${gz:-}" ]; then
-    # ไฟล์บีบอัด: คัดลอก .gz เข้า container → คลาย + เติม GO ข้างใน container
-    echo "→ กำลังนำเข้า (ไฟล์บีบอัด): $(basename "$gz")"
-    docker cp "$gz" "$CONTAINER:/tmp/_in.sql.gz"
-    docker exec "$CONTAINER" python3 /tmp/gunzip.py /tmp/_in.sql.gz
-    docker exec "$CONTAINER" python3 /tmp/add_go.py /tmp/_in.sql /tmp/_fixed.sql "$BATCH_SIZE"
-  else
-    # ไฟล์ .sql ธรรมดา: คัดลอกเข้า container → เติม GO
-    echo "→ กำลังนำเข้า: $(basename "$src")"
-    docker exec -i "$CONTAINER" bash -c "cat > /tmp/_in.sql" < "$src"
-    docker exec "$CONTAINER" python3 /tmp/add_go.py /tmp/_in.sql /tmp/_fixed.sql "$BATCH_SIZE"
+    src="${gz%.gz}"
+    if [ ! -f "$src" ]; then
+      echo "→ กำลังคลายไฟล์: $(basename "$gz")"
+      gunzip -k "$gz"
+    fi
   fi
 
-  # นำเข้าไฟล์ที่แก้แล้ว
+  local fname; fname=$(basename "$src")
+  echo ""
+  echo "→ กำลังนำเข้า: $fname"
+
+  # 1) เติม GO ทุก N statement (เขียนไฟล์ที่แก้แล้วไว้ที่ /tmp ใน container)
+  docker exec -i "$CONTAINER" bash -c "cat > /tmp/_in.sql" < "$src"
+  docker exec "$CONTAINER" python3 /tmp/add_go.py /tmp/_in.sql /tmp/_fixed.sql "$BATCH_SIZE"
+
+  # 2) นำเข้าไฟล์ที่แก้แล้ว
   docker exec "$CONTAINER" "$SQLCMD" -S localhost -U SA -P "$SA_PASSWORD" \
     -d "$DATABASE" -C -b -i /tmp/_fixed.sql
-  echo "   ✅ นำเข้า '$base' สำเร็จ"
+  echo "   ✅ นำเข้า $fname สำเร็จ"
 }
 
 # วนนำเข้าตามลำดับ
