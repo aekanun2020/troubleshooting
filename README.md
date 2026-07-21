@@ -36,12 +36,33 @@ import-toolkit/
 │   └── loans_fact_202602251308.sql.gz         ✅ อยู่ใน repo (บีบอัด 21MB)
 ├── add_go.py         (helper เติม GO)
 ├── gunzip.py         (helper คลาย .gz — รันภายใน container ให้อัตโนมัติ)
-├── import_all.sh     (สำหรับ Mac / Linux)
-├── import_all.bat    (สำหรับ Windows)
+├── import_all.sh     (นำเข้าทั้งชุด — Mac / Linux)
+├── import_all.bat    (นำเข้าทั้งชุด — Windows)
+├── import_one.sh     (นำเข้าไฟล์เดียว — Mac / Linux)
+├── import_one.bat    (นำเข้าไฟล์เดียว — Windows)
 └── README.md
 ```
 
 > หมายเหตุ: ไฟล์ `allrawloanstat` (528MB) ไม่ได้รวมอยู่ใน repo ตามที่กำหนด
+
+## นำเข้าไฟล์ `.sql` เพียงไฟล์เดียว (ตารางเดี่ยว ไม่มี FK)
+
+ถ้ามีไฟล์ `.sql` อื่นที่เป็นตารางเดี่ยว ๆ (ไม่เกี่ยวข้อง foreign key กับตารางอื่น)
+ใช้สคริปต์ `import_one` โดยพิมพ์ path ไฟล์ต่อท้ายคำสั่งได้เลย — ชื่อตารางมาจาก `CREATE TABLE` ในไฟล์เอง
+
+**Windows:**
+```cmd
+import_one.bat  path\to\yourfile.sql
+import_one.bat  path\to\yourfile.sql.gz
+```
+
+**Mac / Linux:**
+```bash
+./import_one.sh  path/to/yourfile.sql
+./import_one.sh  path/to/yourfile.sql.gz
+```
+
+สคริปต์จะคลาย `.gz` (ถ้ามี) + เติม `GO` + นำเข้าให้อัตโนมัติ ทำงานภายใน container ทั้งหมด — ไม่ต้องติดตั้ง Python บนเครื่อง
 
 ## ขั้นตอนที่ 1: ดาวน์โหลดไฟล์มาที่เครื่อง (ไม่ต้องใช้ git)
 
