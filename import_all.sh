@@ -56,6 +56,13 @@ if ! docker exec "$CONTAINER" "$SQLCMD" -S localhost -U SA -P "$SA_PASSWORD" -C 
 fi
 echo "   เชื่อมต่อได้ ✅"
 
+# ตรวจว่ามี python3 ใน container (การคลาย .gz + เติม GO ทำใน container)
+if ! docker exec "$CONTAINER" python3 --version >/dev/null 2>&1; then
+  echo "❌ ไม่พบ python3 ใน container '$CONTAINER'"
+  echo "   สคริปต์นี้รัน gunzip.py และ add_go.py ภายใน Docker ไม่ใช่บนเครื่อง"
+  exit 1
+fi
+
 # สร้าง database ถ้ายังไม่มี
 echo "→ ตรวจสอบ/สร้าง database '$DATABASE' ..."
 docker exec "$CONTAINER" "$SQLCMD" -S localhost -U SA -P "$SA_PASSWORD" -C \

@@ -22,7 +22,8 @@
 ## สิ่งที่ต้องมีก่อน
 
 1. Docker Desktop เปิดอยู่ และ container SQL Server กำลังทำงาน (ค่าเริ่มต้นชื่อ `sql_server`)
-2. มี Python ติดตั้งบนเครื่อง (ใช้คลายไฟล์ .gz — มากับ Anaconda/Miniconda อยู่แล้ว)
+
+> ไม่ต้องติดตั้ง Python บนเครื่อง — สคริปต์จะคลายไฟล์ `.gz` และเติม `GO` ให้ทั้งหมด **ภายใน Docker container** ให้เองโดยอัตโนมัติ
 
 ```
 import-toolkit/
@@ -34,7 +35,7 @@ import-toolkit/
 │   ├── loan_status_dim_202602251308.sql       ✅ อยู่ใน repo
 │   └── loans_fact_202602251308.sql.gz         ✅ อยู่ใน repo (บีบอัด 21MB)
 ├── add_go.py         (helper เติม GO)
-├── gunzip.py         (helper คลาย .gz — ใช้บน Windows)
+├── gunzip.py         (helper คลาย .gz — รันภายใน container ให้อัตโนมัติ)
 ├── import_all.sh     (สำหรับ Mac / Linux)
 ├── import_all.bat    (สำหรับ Windows)
 └── README.md
